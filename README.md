@@ -33,7 +33,7 @@ main()
 
 You can define your own `Using` types by creating a class which implements `Using`:
 
-```
+```ts
 export class Open implements Using<Deno.File> {
   constructor(filename: string, mode?: Deno.OpenMode) {
     this.filename = filename;
