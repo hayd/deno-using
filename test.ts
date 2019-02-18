@@ -1,10 +1,11 @@
 import {
   using,
   usingSync,
-  Timeout,
-  Open,
   ChDir,
+  Open,
   TempDir,
+  Timeout,
+  TimeoutError,
   Using
 } from "./mod.ts";
 import * as Deno from "deno";
@@ -51,10 +52,11 @@ test(async function timeoutFailure() {
   let count = 0;
   await using(new Timeout(100), async _ => {
     await new Promise(res => setTimeout(res, 200));
-    assert(false);
+    assert(false); // should not reach
   }).catch(err => {
     count += 1;
     assert(err);
+    assert.equal(err.name, "TimeoutError");
   });
   assert.equal(count, 1);
 });
