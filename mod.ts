@@ -1,5 +1,3 @@
-import * as Deno from "deno";
-
 export interface Using<T> {
   _aenter: () => Promise<T>;
   _aexit: ((any) => Promise<Boolean>) | ((any) => Promise<void>);
