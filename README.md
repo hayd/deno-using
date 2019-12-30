@@ -7,27 +7,24 @@ Comes with some `Using` types, e.g. `Open`, `ChDir`, `TempDir`, and `Timeout`.
 ## Example:
 
 ```ts
-import * as Deno from "deno";
-import { using, Open } from "./mod.ts";
+import { using, Open } from "htps://deno.land/x/using/mod.ts";
 
 const enc = new TextEncoder();
-const dec = new TextDecoder("utf-8");
+const dec = new TextDecoder();
 
-async function main() {
-  await using(new Open('file', 'w'), async (f: Deno.File) => {
-  	const data = enc.encode("Hello world!\n");
-    await f.write(data);
-  })
-  await using(new Open('file', 'r'), async (f: Deno.File) => {
-  	const data = new Uint8Array(20);
-    await f.read(data);
-    const text = dec.decode(data);
-    console.log(text);
-  })
-}
-
-main()
+await using(new Open("file", "w"), async (f: Deno.File) => {
+  const data = enc.encode("Hello world!\n");
+  await f.write(data);
+});
+await using(new Open("file", "r"), async (f: Deno.File) => {
+  const data = new Uint8Array(20);
+  await f.read(data);
+  const text = dec.decode(data);
+  console.log(text);
+});
 ```
+
+There is also a corresponding sync version `UsingSync`.
 
 ## Custom types
 
@@ -51,5 +48,3 @@ export class Open implements Using<Deno.File> {
   private mode: Deno.OpenMode;
 }
 ```
-
-There is also a corresponding sync version UsingSync.
