@@ -83,7 +83,7 @@ export class TempDir implements Using<string>, UsingSync<string> {
   }
   public async _aexit(e: any) {
     Deno.chdir(this.cwd);
-    Deno.remove(this.dir);
+    await Deno.remove(this.dir);
   }
   public _enter() {
     this.dir = Deno.makeTempDirSync(this.options);

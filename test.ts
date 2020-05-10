@@ -67,21 +67,23 @@ test({
   },
 });
 
-// test({
-//   name: "timeoutFailure",
-//   async fn() {
-//     let count = 0;
-//     await using(new Timeout(100), async (_) => {
-//       await new Promise((res) => setTimeout(res, 200));
-//       assert(false); // should not reach
-//     }).catch((err) => {
-//       count += 1;
-//       assert(err);
-//       assertEquals(err.name, "TimeoutError");
-//     });
-//     assertEquals(count, 1);
-//   },
-// });
+test({
+  name: "timeoutFailure",
+  async fn() {
+    let count = 0;
+    const p = new Promise((res) => setTimeout(res, 200));
+    await using(new Timeout(100), async (_) => {
+      await p;
+      assert(false); // should not reach
+    }).catch((err) => {
+      count += 1;
+      assert(err);
+      assertEquals(err.name, "TimeoutError");
+    });
+    await p;
+    assertEquals(count, 1);
+  },
+});
 
 let count: number;
 export class Custom<T> implements Using<T> {
