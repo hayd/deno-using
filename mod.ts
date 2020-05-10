@@ -95,7 +95,9 @@ export class TempDir implements Using<string>, UsingSync<string> {
     Deno.chdir(this.cwd);
     Deno.remove(this.dir);
   }
+
   private cwd: string;
+
   private dir: string;
   private options: MakeTempDirOptions;
 }
@@ -119,6 +121,7 @@ export class ChDir implements Using<void>, UsingSync<void> {
   public _exit(e: any) {
     Deno.chdir(this.cwd);
   }
+
   private cwd: string;
   private dir: string;
 }
