@@ -72,8 +72,8 @@ export interface MakeTempDirOptions {
 export class TempDir implements Using<string>, UsingSync<string> {
   constructor(options: MakeTempDirOptions = {}) {
     this.options = options;
-    this.cwd = ''
-    this.dir = ''
+    this.cwd = "";
+    this.dir = "";
   }
   public async _aenter() {
     this.dir = await Deno.makeTempDir(this.options);
@@ -105,7 +105,7 @@ export class TempDir implements Using<string>, UsingSync<string> {
 export class ChDir implements Using<void>, UsingSync<void> {
   constructor(dir: string) {
     this.dir = dir;
-    this.cwd = ''
+    this.cwd = "";
   }
   public async _aenter() {
     this.cwd = Deno.cwd();
@@ -137,8 +137,8 @@ export class TimeoutError extends Error {
 export class Timeout implements Using<void> {
   constructor(ms: number) {
     this.ms = ms;
-    this.id = 0
-    this._timeout = Promise.resolve()
+    this.id = 0;
+    this._timeout = Promise.resolve();
   }
   public async _aenter() {
     this._timeout = new Promise((resolve, reject) => {
