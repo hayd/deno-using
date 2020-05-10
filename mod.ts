@@ -1,17 +1,17 @@
 export interface Using<T> {
   _aenter: () => Promise<T>;
-  _aexit: ((any) => Promise<Boolean>) | ((any) => Promise<void>);
+  _aexit: ((any: any) => Promise<Boolean>) | ((any: any) => Promise<void>);
   _timeout?: Promise<void>;
 }
 
 export interface UsingSync<T> {
   _enter: () => T;
-  _exit: ((any) => Boolean) | ((any) => void);
+  _exit: ((any: any) => Boolean) | ((any: any) => void);
 }
 
 export async function using<T>(
   w: Using<T>,
-  f: (T) => Promise<void>
+  f: (t: T) => Promise<void>,
 ): Promise<void> {
   const item = await w._aenter();
   let e;
@@ -29,7 +29,7 @@ export async function using<T>(
   }
 }
 
-export function usingSync<T>(w: UsingSync<T>, f: (T) => void): void {
+export function usingSync<T>(w: UsingSync<T>, f: (t: T) => void): void {
   const item = w._enter();
   let e;
   try {
@@ -44,7 +44,7 @@ export function usingSync<T>(w: UsingSync<T>, f: (T) => void): void {
 }
 
 export class Open implements Using<Deno.File> {
-  constructor(filename: string, mode?: Deno.OpenMode) {
+  constructor(filename: string, mode?: Deno.OpenOptions) {
     this.filename = filename;
     this.mode = mode;
   }
@@ -52,12 +52,13 @@ export class Open implements Using<Deno.File> {
     this.file = await Deno.open(this.filename, this.mode);
     return this.file;
   }
-  public async _aexit(e) {
+  public async _aexit(e: any) {
     this.file.close();
   }
+  // @ts-ignore property 'file' has no initializer and is not definitely assigned in the constructor
   private file: Deno.File;
   private filename: string;
-  private mode: Deno.OpenMode;
+  private mode: Deno.OpenOptions | undefined;
 }
 
 // TODO use the actual deno interface
@@ -71,6 +72,8 @@ export interface MakeTempDirOptions {
 export class TempDir implements Using<string>, UsingSync<string> {
   constructor(options: MakeTempDirOptions = {}) {
     this.options = options;
+    this.cwd = "";
+    this.dir = "";
   }
   public async _aenter() {
     this.dir = await Deno.makeTempDir(this.options);
@@ -78,7 +81,7 @@ export class TempDir implements Using<string>, UsingSync<string> {
     Deno.chdir(this.dir);
     return this.dir;
   }
-  public async _aexit(e) {
+  public async _aexit(e: any) {
     Deno.chdir(this.cwd);
     Deno.remove(this.dir);
   }
@@ -88,11 +91,13 @@ export class TempDir implements Using<string>, UsingSync<string> {
     Deno.chdir(this.dir);
     return this.dir;
   }
-  public _exit(e) {
+  public _exit(e: any) {
     Deno.chdir(this.cwd);
     Deno.remove(this.dir);
   }
+
   private cwd: string;
+
   private dir: string;
   private options: MakeTempDirOptions;
 }
@@ -100,21 +105,23 @@ export class TempDir implements Using<string>, UsingSync<string> {
 export class ChDir implements Using<void>, UsingSync<void> {
   constructor(dir: string) {
     this.dir = dir;
+    this.cwd = "";
   }
   public async _aenter() {
     this.cwd = Deno.cwd();
     Deno.chdir(this.dir);
   }
-  public async _aexit(e) {
+  public async _aexit(e: any) {
     Deno.chdir(this.cwd);
   }
   public _enter() {
     this.cwd = Deno.cwd();
     Deno.chdir(this.dir);
   }
-  public _exit(e) {
+  public _exit(e: any) {
     Deno.chdir(this.cwd);
   }
+
   private cwd: string;
   private dir: string;
 }
@@ -130,6 +137,8 @@ export class TimeoutError extends Error {
 export class Timeout implements Using<void> {
   constructor(ms: number) {
     this.ms = ms;
+    this.id = 0;
+    this._timeout = Promise.resolve();
   }
   public async _aenter() {
     this._timeout = new Promise((resolve, reject) => {
@@ -138,7 +147,7 @@ export class Timeout implements Using<void> {
       }, this.ms);
     });
   }
-  public async _aexit(e) {
+  public async _aexit(e: any) {
     clearTimeout(this.id);
   }
   private id: number;
